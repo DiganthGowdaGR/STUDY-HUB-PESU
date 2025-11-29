@@ -892,16 +892,8 @@
 
         // Visitor Counter using CountAPI (Free, no key needed for basic use)
         function fetchVisitorCount() {
-            // Using a namespace 'cse-study-hub-demo' - in production change this to your unique domain name
-            fetch('https://api.countapi.xyz/hit/cse-sem5-hub-unique-id/visits')
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById('visitor-count').innerText = data.value;
-                })
-                .catch(() => {
-                    // Fallback if API fails (e.g. Adblockers)
-                    document.getElementById('visitor-count').innerText = "N/A (Adblock)";
-                });
+            // API is currently unavailable
+            document.getElementById('visitor-count').innerText = "Unavailable";
         }
 
         // ==========================================
