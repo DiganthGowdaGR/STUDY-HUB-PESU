@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Hub PESU</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-green: #00ff9d;
+            --neon-blue: #00d2ff;
+            --dark-bg: #050505;
+            --glass: rgba(20, 20, 25, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #e0e0e0;
+            --danger: #ff3b3b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Space Background --- */
+        #space-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at bottom, #0b1021 0%, #000000 100%);
+        }
+
+        /* --- Navbar --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .logo span { color: var(--neon-green); }
+
+        .nav-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        select {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+            cursor: pointer;
+        }
+
+        .admin-btn {
+            background: transparent;
+            border: 1px solid var(--text);
+            color: var(--text);
+            padding: 5px 15px;
+            cursor: pointer;
+            font-family: 'Roboto Mono', monospace;
+            transition: 0.3s;
+            border-radius: 4px;
+        }
+
+        .admin-btn:hover {
+            background: var(--text);
+            color: #000;
+        }
+
+        /* --- Admin Panel Stats --- */
+        #admin-panel {
+            display: none; /* Hidden by default */
+            background: rgba(0, 255, 157, 0.05);
+            border-bottom: 1px solid var(--neon-green);
+            padding: 1rem 5%;
+            font-family: 'Roboto Mono', monospace;
+            color: var(--neon-green);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .admin-panel-info {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .admin-panel-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .admin-new-btn {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Roboto Mono', monospace;
+            transition: 0.3s;
+        }
+
+        .admin-new-btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+        }
+
+        .admin-exit-btn {
+            background: transparent;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Roboto Mono', monospace;
+            transition: 0.3s;
+        }
+
+        .admin-exit-btn:hover {
+            background: var(--neon-green);
+            color: #000;
+        }
+
+        /* --- Main Layout --- */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+
+        h2.section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--neon-blue);
+            padding-left: 15px;
+            text-transform: uppercase;
+        }
+
+        /* --- Grid System --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        /* --- Cards --- */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .card-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-delete-btn {
+            background: none;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .card-delete-btn:hover {
+            background: var(--danger);
+            color: #000;
+        }
+
+        .card-edit-btn {
+            background: none;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .card-edit-btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+        }
+
+        .subject-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .subject-code {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--neon-blue);
+            background: rgba(0, 210, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* --- Links List --- */
+        .link-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+
+        .link-item:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .link-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: #ccc;
+            flex-grow: 1;
+            font-size: 0.95rem;
+        }
+
+        .link-content:hover {
+            color: var(--neon-green);
+        }
+
+        .link-icon { width: 20px; text-align: center; }
+
+        .link-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            opacity: 0.6;
+            font-size: 0.9rem;
+            padding: 5px;
+            display: none; /* Hidden for normal users */
+        }
+
+        .delete-btn:hover { opacity: 1; }
+
+        .edit-link-btn {
+            background: none;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .edit-link-btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+        }
+
+        /* --- Add Link Button (Inside Card) --- */
+        .add-link-trigger {
+            margin-top: 15px;
+            width: 100%;
+            padding: 8px;
+            border: 1px dashed var(--glass-border);
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: none; /* Hidden for normal users */
+        }
+        
+        .add-link-trigger:hover {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+
+        /* --- Modals --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: #111;
+            border: 1px solid var(--neon-blue);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+        }
+
+        .modal h3 { color: #fff; margin-bottom: 1.5rem; }
+
+        .input-group { margin-bottom: 1rem; }
+        
+        input, select.modal-input {
+            width: 100%;
+            padding: 10px;
+            background: #050505;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        input:focus { outline: none; border-color: var(--neon-green); }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancel { background: #333; color: #ccc; }
+        .btn-confirm { background: var(--neon-blue); color: #000; }
+        .btn-confirm:hover { background: var(--neon-green); }
+
+        /* --- Mobile --- */
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            nav { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Animation -->
+    <canvas id="space-canvas"></canvas>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal">
+            <h3><i class="fas fa-user-shield"></i> Admin Access</h3>
+            <div class="input-group">
+                <label>Access Code</label>
+                <input type="password" id="adminPass" placeholder="Enter code...">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('loginModal')">Cancel</button>
+                <button class="btn btn-confirm" onclick="verifyAdmin()">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Link Modal -->
+    <div id="addModal" class="modal-overlay">
+        <div class="modal">
+            <h3 id="addModalTitle">Add Resource</h3>
+            <input type="hidden" id="targetSubject">
+            <div class="input-group">
+                <label>Title</label>
+                <input type="text" id="linkTitle" placeholder="e.g. Unit 1 Notes">
+            </div>
+            <div class="input-group">
+                <label>URL</label>
+                <input type="text" id="linkUrl" placeholder="https://...">
+            </div>
+            <div class="input-group">
+                <label>Type</label>
+                <select class="modal-input" id="linkIcon">
+                    <option value="fa-google-drive">Google Drive</option>
+                    <option value="fa-file-pdf">PDF Document</option>
+                    <option value="fa-video">Video/Youtube</option>
+                    <option value="fa-code">Source Code</option>
+                    <option value="fa-link">Web Link</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('addModal')">Cancel</button>
+                <button class="btn btn-confirm" id="linkModalSaveBtn" onclick="saveLink()">Add Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Subject Modal -->
+    <div id="subjectModal" class="modal-overlay">
+        <div class="modal">
+            <h3 id="subjectModalTitle">Create New Subject</h3>
+            <div class="input-group">
+                <label>Subject Key</label>
+                <input type="text" id="subjectKey" placeholder="e.g. ML">
+            </div>
+            <div class="input-group">
+                <label>Subject Name</label>
+                <input type="text" id="subjectName" placeholder="Machine Learning">
+            </div>
+            <div class="input-group">
+                <label>Subject Code</label>
+                <input type="text" id="subjectCode" placeholder="CS501">
+            </div>
+            <div class="input-group">
+                <label>Semester</label>
+                <select class="modal-input" id="subjectSem">
+                    <option value="3">Semester 3</option>
+                    <option value="5" selected>Semester 5</option>
+                    <option value="7">Semester 7</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('subjectModal')">Cancel</button>
+                <button class="btn btn-confirm" onclick="saveSubject()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="logo"><i class="fas fa-rocket"></i> CSE <span>HUB</span></div>
+        <div class="nav-controls">
+            <select id="semFilter" onchange="filterSem()">
+                <option value="5">Semester 5</option>
+                <option value="3">Semester 3</option>
+                <option value="7">Semester 7</option>
+                <option value="all">All Semesters</option>
+            </select>
+            <button class="admin-btn" onclick="openLogin()"><i class="fas fa-key"></i> Admin</button>
+        </div>
+    </nav>
+
+    <!-- Admin Stats Panel -->
+    <div id="admin-panel">
+        <div class="admin-panel-info">
+            <span><i class="fas fa-eye"></i> Total Visitors: <strong id="visitor-count">Loading...</strong></span>
+            <span style="color: var(--neon-blue)"><i class="fas fa-user-check"></i> Admin Mode Active</span>
+        </div>
+        <div class="admin-panel-actions">
+            <button class="admin-new-btn" onclick="openSubjectModal()">
+                <i class="fas fa-folder-plus"></i> New Subject
+            </button>
+            <button class="admin-exit-btn" onclick="disableAdminMode()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h2 class="section-title">Study Materials</h2>
+        
+        <div class="grid" id="cardGrid">
+            <!-- Cards injected via JS -->
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. DATA STORE (The "Database")
+        // ==========================================
+        // To make links permanent for everyone, EDIT THIS SECTION manually in the file.
+        const initialData = {
+            "ML": {
+                code: "CS501",
+                sem: 5,
+                name: "Machine Learning",
+                links: [
+                    { title: "All Module Drive", url: "https://drive.google.com/drive/", icon: "fa-google-drive" },
+                    { title: "Linear Regression Notes", url: "#", icon: "fa-file-pdf" }
+                ]
+            },
+            "DBMS": {
+                code: "CS502",
+                sem: 5,
+                name: "Database Mgmt Systems",
+                links: [
+                    { title: "Lab Manual", url: "#", icon: "fa-code" },
+                    { title: "SQL Cheat Sheet", url: "#", icon: "fa-link" }
+                ]
+            },
+            "DA": {
+                code: "CS503",
+                sem: 5,
+                name: "Design & Analysis",
+                links: [
+                    { title: "Algorithm Complexity", url: "#", icon: "fa-video" }
+                ]
+            },
+            "GTA": {
+                code: "CS504",
+                sem: 5,
+                name: "Graph Theory",
+                links: [
+                    { title: "Textbook PDF", url: "#", icon: "fa-book" }
+                ]
+            },
+            "SE": {
+                code: "CS505",
+                sem: 5,
+                name: "Software Engineering",
+                links: [
+                    { title: "SDLC Models", url: "#", icon: "fa-file-powerpoint" }
+                ]
+            }
+        };
+
+        // Load data from LocalStorage (for Admin testing) or fallback to initialData
+        let db = JSON.parse(localStorage.getItem('studyHubData')) || initialData;
+        let isAdmin = false;
+        let editingSubjectKey = null;
+        let editingLinkInfo = null;
+        const correctPass = "2325357705";
+
+        // ==========================================
+        // 2. RENDER LOGIC
+        // ==========================================
+        function renderDashboard() {
+            const grid = document.getElementById('cardGrid');
+            const filter = document.getElementById('semFilter').value;
+            grid.innerHTML = '';
+
+            for (const [key, subject] of Object.entries(db)) {
+                // Filter logic
+                if (filter !== 'all' && subject.sem != filter) continue;
+
+                // Build Links HTML
+                let linksHtml = subject.links.map((link, index) => `
+                    <li class="link-item">
+                        <a href="${link.url}" target="_blank" class="link-content">
+                            <i class="fas ${link.icon} link-icon"></i> ${link.title}
+                        </a>
+                        <div class="link-actions">
+                            <button class="edit-link-btn" onclick="openAddModal('${key}', ${index})">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="delete-btn" onclick="deleteLink('${key}', ${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                `).join('');
+
+                // Create Card
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-header-left">
+                            <div class="subject-title">${subject.name}</div>
+                            <div class="subject-code">${subject.code}</div>
+                        </div>
+                        <div class="card-header-actions">
+                            <button class="card-edit-btn" onclick="openSubjectModal('${key}')">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="card-delete-btn" onclick="deleteSubject('${key}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <ul class="link-list">
+                        ${linksHtml}
+                    </ul>
+                    <button class="add-link-trigger" onclick="openAddModal('${key}')">
+                        <i class="fas fa-plus"></i> Add Resource
+                    </button>
+                `;
+                grid.appendChild(card);
+            }
+            updateAdminUI();
+        }
+
+        function updateAdminUI() {
+            const deleteBtns = document.querySelectorAll('.delete-btn');
+            const addBtns = document.querySelectorAll('.add-link-trigger');
+            const cardDeleteBtns = document.querySelectorAll('.card-delete-btn');
+            const cardEditBtns = document.querySelectorAll('.card-edit-btn');
+            const linkEditBtns = document.querySelectorAll('.edit-link-btn');
+            const adminPanel = document.getElementById('admin-panel');
+
+            if (isAdmin) {
+                deleteBtns.forEach(b => b.style.display = 'block');
+                addBtns.forEach(b => b.style.display = 'block');
+                cardDeleteBtns.forEach(b => b.style.display = 'block');
+                cardEditBtns.forEach(b => b.style.display = 'block');
+                linkEditBtns.forEach(b => b.style.display = 'block');
+                adminPanel.style.display = 'block';
+                
+                // Fetch real visitor count (using a public key based on domain, using fallback for localhost)
+                fetchVisitorCount();
+            } else {
+                deleteBtns.forEach(b => b.style.display = 'none');
+                addBtns.forEach(b => b.style.display = 'none');
+                cardDeleteBtns.forEach(b => b.style.display = 'none');
+                cardEditBtns.forEach(b => b.style.display = 'none');
+                linkEditBtns.forEach(b => b.style.display = 'none');
+                adminPanel.style.display = 'none';
+            }
+        }
+
+        // ==========================================
+        // 3. ADMIN FUNCTIONS
+        // ==========================================
+        function openLogin() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function verifyAdmin() {
+            const input = document.getElementById('adminPass').value;
+            if (input === correctPass) {
+                isAdmin = true;
+                closeModal('loginModal');
+                renderDashboard();
+                alert("Admin Mode: Changes saved to LocalStorage. To make them permanent for everyone, update the HTML file.");
+            } else {
+                alert("Access Denied");
+            }
+            document.getElementById('adminPass').value = '';
+        }
+
+        function disableAdminMode() {
+            isAdmin = false;
+            updateAdminUI();
+        }
+
+        function openSubjectModal(subjKey = null) {
+            const modalTitle = document.getElementById('subjectModalTitle');
+            const keyInput = document.getElementById('subjectKey');
+            const nameInput = document.getElementById('subjectName');
+            const codeInput = document.getElementById('subjectCode');
+            const semInput = document.getElementById('subjectSem');
+
+            if (subjKey && db[subjKey]) {
+                editingSubjectKey = subjKey;
+                modalTitle.textContent = 'Edit Subject';
+                keyInput.value = subjKey;
+                keyInput.disabled = true;
+                nameInput.value = db[subjKey].name;
+                codeInput.value = db[subjKey].code;
+                semInput.value = db[subjKey].sem;
+            } else {
+                editingSubjectKey = null;
+                modalTitle.textContent = 'Create New Subject';
+                keyInput.disabled = false;
+                keyInput.value = '';
+                nameInput.value = '';
+                codeInput.value = '';
+                semInput.value = '5';
+            }
+
+            document.getElementById('subjectModal').style.display = 'flex';
+        }
+
+        function saveSubject() {
+            const keyInput = document.getElementById('subjectKey');
+            const key = keyInput.value.trim().toUpperCase();
+            const name = document.getElementById('subjectName').value.trim();
+            const code = document.getElementById('subjectCode').value.trim().toUpperCase();
+            const sem = document.getElementById('subjectSem').value;
+
+            if (!key || !name || !code || !sem) {
+                alert("Please fill in all subject details.");
+                return;
+            }
+
+            if (editingSubjectKey) {
+                const target = db[editingSubjectKey];
+                if (!target) {
+                    alert("Subject no longer exists.");
+                    closeModal('subjectModal');
+                    return;
+                }
+                target.name = name;
+                target.code = code;
+                target.sem = parseInt(sem, 10);
+            } else {
+                if (db[key]) {
+                    alert("Subject key already exists. Choose another short code (e.g., ML, DBMS).");
+                    return;
+                }
+                db[key] = {
+                    code,
+                    sem: parseInt(sem, 10),
+                    name,
+                    links: []
+                };
+            }
+
+            saveData();
+            closeModal('subjectModal');
+            renderDashboard();
+        }
+
+        function deleteSubject(key) {
+            if (!confirm('Delete entire subject card? All its resources will be removed.')) return;
+            delete db[key];
+            saveData();
+            renderDashboard();
+        }
+
+        function deleteLink(subjKey, index) {
+            if (!confirm("Delete this link?")) return;
+            db[subjKey].links.splice(index, 1);
+            saveData();
+            renderDashboard();
+        }
+
+        function openAddModal(subjKey, linkIndex = null) {
+            const modalTitle = document.getElementById('addModalTitle');
+            const saveBtn = document.getElementById('linkModalSaveBtn');
+            const titleInput = document.getElementById('linkTitle');
+            const urlInput = document.getElementById('linkUrl');
+            const iconSelect = document.getElementById('linkIcon');
+
+            document.getElementById('targetSubject').value = subjKey;
+
+            if (linkIndex !== null && db[subjKey] && db[subjKey].links[linkIndex]) {
+                editingLinkInfo = { subjKey, index: linkIndex };
+                const link = db[subjKey].links[linkIndex];
+                modalTitle.textContent = 'Edit Resource';
+                saveBtn.textContent = 'Save Changes';
+                titleInput.value = link.title;
+                urlInput.value = link.url;
+                iconSelect.value = link.icon;
+            } else {
+                editingLinkInfo = null;
+                modalTitle.textContent = 'Add Resource';
+                saveBtn.textContent = 'Add Link';
+                titleInput.value = '';
+                urlInput.value = '';
+                iconSelect.value = 'fa-google-drive';
+            }
+
+            document.getElementById('addModal').style.display = 'flex';
+        }
+
+        function saveLink() {
+            const subjKey = document.getElementById('targetSubject').value;
+            const title = document.getElementById('linkTitle').value.trim();
+            const url = document.getElementById('linkUrl').value.trim();
+            const icon = document.getElementById('linkIcon').value;
+
+            if (!subjKey || !db[subjKey]) {
+                alert('Subject not found. Please try again.');
+                return;
+            }
+
+            if (!title || !url) {
+                alert('Please provide both a title and URL.');
+                return;
+            }
+
+            if (editingLinkInfo && editingLinkInfo.subjKey === subjKey) {
+                db[subjKey].links[editingLinkInfo.index] = { title, url, icon };
+            } else {
+                db[subjKey].links.push({ title, url, icon });
+            }
+
+            saveData();
+            closeModal('addModal');
+            renderDashboard();
+        }
+
+        function saveData() {
+            // Saves to browser memory only (Simulating database)
+            localStorage.setItem('studyHubData', JSON.stringify(db));
+        }
+
+        // ==========================================
+        // 4. UTILITIES
+        // ==========================================
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+            if (id === 'subjectModal') {
+                resetSubjectForm();
+            } else if (id === 'addModal') {
+                resetLinkForm();
+            }
+        }
+
+        function resetSubjectForm() {
+            editingSubjectKey = null;
+            const modalTitle = document.getElementById('subjectModalTitle');
+            const keyInput = document.getElementById('subjectKey');
+            modalTitle.textContent = 'Create New Subject';
+            keyInput.disabled = false;
+            keyInput.value = '';
+            document.getElementById('subjectName').value = '';
+            document.getElementById('subjectCode').value = '';
+            document.getElementById('subjectSem').value = '5';
+        }
+
+        function resetLinkForm() {
+            editingLinkInfo = null;
+            document.getElementById('addModalTitle').textContent = 'Add Resource';
+            document.getElementById('linkModalSaveBtn').textContent = 'Add Link';
+            document.getElementById('targetSubject').value = '';
+            document.getElementById('linkTitle').value = '';
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('linkIcon').value = 'fa-google-drive';
+        }
+
+        function filterSem() {
+            renderDashboard();
+        }
+
+        // Visitor Counter using CountAPI (Free, no key needed for basic use)
+        function fetchVisitorCount() {
+            // Using a namespace 'cse-study-hub-demo' - in production change this to your unique domain name
+            fetch('https://api.countapi.xyz/hit/cse-sem5-hub-unique-id/visits')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('visitor-count').innerText = data.value;
+                })
+                .catch(() => {
+                    // Fallback if API fails (e.g. Adblockers)
+                    document.getElementById('visitor-count').innerText = "N/A (Adblock)";
+                });
+        }
+
+        // ==========================================
+        // 5. SPACE BACKGROUND (Canvas)
+        // ==========================================
+        const canvas = document.getElementById('space-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Star {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.random()})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 150; i++) stars.push(new Star());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+        
+        // Init
+        resizeCanvas();
+        initStars();
+        animate();
+        renderDashboard(); // Initial Render
+
+    </script>
+</body>
+</html>
